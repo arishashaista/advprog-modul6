@@ -5,6 +5,7 @@
 - [Commit 3 Reflection Notes](#commit-3-reflection-notes)
 - [Commit 4 Reflection Notes](#commit-4-reflection-notes)
 - [Commit 5 Reflection Notes](#commit-5-reflection-notes)
+- [Commit Bonus Reflection Notes](#commit-bonus-reflection-notes)
 
 ## Commit 1 Reflection Notes
 Dalam membangun single-threaded web server, terdapat dua protokol utama yang terlibat, yaitu **Hypertext Transfer Protocol (HTTP)** dan **Transmission Control Protocol (TCP)**.
@@ -76,3 +77,10 @@ Agar server dapat bekerja dalam mode multi-threaded, ThreadPool diperbarui sehin
 Ketika ada task baru, fungsi execute akan mengirimkan closure tugas melalui sender channel, yang kemudian akan diproses oleh thread yang tersedia. Worker akan terus mengambil tugas baru dari receiver channel dalam loop, menggunakan mutex untuk menghindari konflik akses data (race condition).
 
 Dengan pendekatan ini, ThreadPool dapat menangani banyak permintaan secara bersamaan tanpa menciptakan terlalu banyak thread yang berlebihan, sehingga dapat menghindari overhead dan menjaga efisiensi sistem. Selain itu, penggunaan channel sebagai mekanisme komunikasi antar-thread memastikan distribusi tugas yang aman tanpa menyebabkan kesalahan sinkronisasi (race condition). Dengan demikian, web server menjadi lebih efisien dan mampu menangani beban kerja yang lebih tinggi tanpa mengalami keterlambatan akibat model single-threaded sebelumnya.
+
+## Commit Bonus Reflection Notes
+Pada tahap ini,  diperkenalkan sebuah fungsi baru bernama build, yang berfungsi sebagai pengganti dari new. Proses refactoring ini mengacu pada pedoman dalam buku Rust pada bagian Refactoring to Improve Modularity and Error Handling.
+
+Perbedaan utama antara build() dan new() terletak pada pendekatan dalam menangani error. Fungsi build() dirancang untuk memberikan penanganan error yang lebih baik dengan mengembalikan Result, sedangkan new() cenderung langsung memicu panic! saat terjadi kesalahan yang tidak terduga.
+
+Salah satu peningkatan penting dalam build() adalah kemampuannya untuk memvalidasi ukuran ThreadPool yang diberikan. Jika nilai yang dimasukkan adalah 0 atau angka negatif, fungsi ini akan mengembalikan Err dengan pesan yang menjelaskan bahwa ukuran tersebut tidak valid atau tidak masuk akal. Dengan pendekatan ini, kita dapat menghindari kesalahan yang tidak diinginkan dan membuat kode lebih modular serta lebih aman dalam menangani berbagai skenario error.
