@@ -2,6 +2,7 @@
 
 - [Single-Threaded Web Server](#1-single-threaded-web-server)
 - [Returning HTML](#2-returning-html)
+- [Validating Request and Selectively Responding](#3-validating-request-and-selectively-responding)
 
 ## 1. Single-Threaded Web Server
 Dalam membangun single-threaded web server, terdapat dua protokol utama yang terlibat, yaitu **Hypertext Transfer Protocol (HTTP)** dan **Transmission Control Protocol (TCP)**.
@@ -36,3 +37,24 @@ Screenshot:
 Setelah itu, server menyusun respons HTTP dengan status line `"HTTP/1.1 200 OK"` serta menambahkan header `Content-Length` yang menunjukkan ukuran konten HTML yang akan dikirim. Konten HTML tersebut kemudian dimasukkan sebagai body dari respons.
 
 Terakhir, respons HTTP dikirimkan kepada klien melalui koneksi TCP stream menggunakan metode `write_all`, sehingga browser dapat menerima dan menampilkan halaman yang diminta.
+
+## 3. Validating Request and Selectively Responding
+Screenshot:
+ <img src='img/commit3.png'>
+
+ Pada awalnya, web server selalu menampilkan `hello.html` tanpa memperhatikan jenis *request* yang dikirimkan oleh browser. Saat ini, ditambahkan logika untuk memeriksa apakah permintaan berasal dari / sebelum mengembalikan halaman HTML. Jika permintaan tidak sesuai, server akan mengembalikan respons dengan kode status 404 beserta halaman error (404.html). Cara menangani `404.html` serupa dengan `hello.html`, yaitu dengan membaca dan mengirimkan file sebagai respons.
+
+ ```rust
+ let request_line = buf_reader.lines().next().unwrap().unwrap();
+```
+
+Penjelasan:
+
+- `.lines()` → Menghasilkan iterator yang membaca setiap baris dari BufReader.
+- `.next()` → Mengambil baris pertama dari iterator tersebut.
+- `unwrap() pertama` → Mengekstrak nilai dari Option, jika ada.
+- `unwrap() kedua` → Mengekstrak nilai dari Result, jika operasi sebelumnya berhasil.
+
+Untuk menjaga kode tetap bersih dan terstruktur sesuai prinsip DRY (Don't Repeat Yourself), dilakukan refactoring pada main.rs. Sebelumnya, variabel status_line dan contents dideklarasikan secara terpisah dalam setiap blok if-else, sehingga tidak dapat digunakan secara fleksibel di luar cakupannya. Untuk mengatasi hal ini, pendekatan yang lebih efisien digunakan dengan mendefinisikan kedua variabel secara bersamaan di satu tempat menggunakan let (status_line, contents) = ....
+
+Dengan cara ini, dapat dihindari pengulangan kode dan memastikan bahwa respons HTTP dikonstruksi dengan lebih rapi dan efisien tanpa perlu mendeklarasikan variabel yang sama berkali-kali.
