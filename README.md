@@ -4,6 +4,7 @@
 - [Commit 2 Reflection Notes](#commit-2-reflection-notes)
 - [Commit 3 Reflection Notes](#commit-3-reflection-notes)
 - [Commit 4 Reflection Notes](#commit-4-reflection-notes)
+- [Commit 5 Reflection Notes](#commit-5-reflection-notes)
 
 ## Commit 1 Reflection Notes
 Dalam membangun single-threaded web server, terdapat dua protokol utama yang terlibat, yaitu **Hypertext Transfer Protocol (HTTP)** dan **Transmission Control Protocol (TCP)**.
@@ -66,3 +67,12 @@ Pada bagian ini, akan mensimulasikan respons lambat pada web server. Untuk menca
 Jika server menerima permintaan dengan `"GET /sleep HTTP/1.1"`, maka server akan tertunda selama 10 detik sebelum mengirimkan respons. Hal ini dirancang untuk mensimulasikan keterlambatan respons, yang dapat berdampak pada permintaan lain yang dikirim ke server.
 
 Untuk menguji efeknya, dapat dibuka dua jendela browser secara bersamaan—satu menuju endpoint `/`dan satu lagi ke `/sleep`. Jika kita mencoba mengakses `/` setelah menjalankan `/sleep`, kita akan melihat bahwa halaman `/` tidak langsung dimuat, melainkan harus menunggu hingga proses sleep selama 10 detik selesai. Hal ini menunjukkan bagaimana server menangani request dalam single-threaded mode, di mana satu request yang berjalan lama dapat menghambat eksekusi request lainnya.
+
+## Commit 5 Reflection Notes
+Pada tahap ini, web server ditingkatkan dari single-threaded menjadi multi-threaded agar dapat menangani banyak permintaan secara bersamaan. Untuk mencapai hal ini, digunakan ThreadPool, yang berfungsi mengelola sejumlah thread agar dapat menangani berbagai tasks dengan lebih efisien. Awalnya, ThreadPool hanya menyimpan daftar Worker, di mana setiap Worker merupakan struktur yang terdiri dari JoinHandle<()> untuk menangani eksekusi pada tiap thread.
+
+Agar server dapat bekerja dalam mode multi-threaded, ThreadPool diperbarui sehingga menyimpan vektor Worker. Setiap Worker memiliki ID unik serta sebuah thread yang diinisialisasi menggunakan closure kosong. Pada saat ThreadPool dibuat, sistem juga membentuk channel komunikasi, di mana sender (pengirim) disimpan dalam ThreadPool, sementara receiver (penerima) disalin ke setiap Worker.
+
+Ketika ada task baru, fungsi execute akan mengirimkan closure tugas melalui sender channel, yang kemudian akan diproses oleh thread yang tersedia. Worker akan terus mengambil tugas baru dari receiver channel dalam loop, menggunakan mutex untuk menghindari konflik akses data (race condition).
+
+Dengan pendekatan ini, ThreadPool dapat menangani banyak permintaan secara bersamaan tanpa menciptakan terlalu banyak thread yang berlebihan, sehingga dapat menghindari overhead dan menjaga efisiensi sistem. Selain itu, penggunaan channel sebagai mekanisme komunikasi antar-thread memastikan distribusi tugas yang aman tanpa menyebabkan kesalahan sinkronisasi (race condition). Dengan demikian, web server menjadi lebih efisien dan mampu menangani beban kerja yang lebih tinggi tanpa mengalami keterlambatan akibat model single-threaded sebelumnya.
