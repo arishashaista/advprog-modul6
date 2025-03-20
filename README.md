@@ -1,10 +1,11 @@
 # AdvProg-Module 6
 
-- [Single-Threaded Web Server](#1-single-threaded-web-server)
-- [Returning HTML](#2-returning-html)
-- [Validating Request and Selectively Responding](#3-validating-request-and-selectively-responding)
+- [Commit 1 Reflection Notes](#commit-1-reflection-notes)
+- [Commit 2 Reflection Notes](#commit-2-reflection-notes)
+- [Commit 3 Reflection Notes](#commit-3-reflection-notes)
+- [Commit 4 Reflection Notes](#commit-4-reflection-notes)
 
-## 1. Single-Threaded Web Server
+## Commit 1 Reflection Notes
 Dalam membangun single-threaded web server, terdapat dua protokol utama yang terlibat, yaitu **Hypertext Transfer Protocol (HTTP)** dan **Transmission Control Protocol (TCP)**.
 - **TCP (Transmission Control Protocol)** adalah protokol tingkat rendah yang menentukan cara data dikirim antara klien dan server, tetapi tidak menentukan isi dari data tersebut.
 - **HTTP (Hypertext Transfer Protocol)** digunakan untuk menentukan format *request* dan *response* yang dikirim melalui TCP.
@@ -28,7 +29,7 @@ Fungsi yang Digunakan dalam handle_connection():
 - `take_while(|line| !line.is_empty())` → Menghentikan pembacaan saat menemukan baris kosong (\r\n), karena ini menandakan akhir dari request HTTP.
 - `collect()` → Mengumpulkan hasil pembacaan ke dalam vektor (Vec<String>) untuk diproses lebih lanjut.
 
-## 2. Returning HTML
+## Commit 2 Reflection Notes
 Screenshot:
  <img src='img/commit2.png'>
 
@@ -38,7 +39,7 @@ Setelah itu, server menyusun respons HTTP dengan status line `"HTTP/1.1 200 OK"`
 
 Terakhir, respons HTTP dikirimkan kepada klien melalui koneksi TCP stream menggunakan metode `write_all`, sehingga browser dapat menerima dan menampilkan halaman yang diminta.
 
-## 3. Validating Request and Selectively Responding
+## Commit 3 Reflection Notes
 Screenshot:
  <img src='img/commit3.png'>
 
@@ -58,3 +59,10 @@ Penjelasan:
 Untuk menjaga kode tetap bersih dan terstruktur sesuai prinsip DRY (Don't Repeat Yourself), dilakukan refactoring pada main.rs. Sebelumnya, variabel status_line dan contents dideklarasikan secara terpisah dalam setiap blok if-else, sehingga tidak dapat digunakan secara fleksibel di luar cakupannya. Untuk mengatasi hal ini, pendekatan yang lebih efisien digunakan dengan mendefinisikan kedua variabel secara bersamaan di satu tempat menggunakan let (status_line, contents) = ....
 
 Dengan cara ini, dapat dihindari pengulangan kode dan memastikan bahwa respons HTTP dikonstruksi dengan lebih rapi dan efisien tanpa perlu mendeklarasikan variabel yang sama berkali-kali.
+
+## Commit 4 Reflection Notes
+Pada bagian ini, akan mensimulasikan respons lambat pada web server. Untuk mencapainya, menggunakan fungsi `thread::sleep`, yang memungkinkan kita menunda eksekusi program selama waktu tertentu. Selain itu, dapat dimanfaatkan match untuk memeriksa request line yang dikirimkan oleh klien.
+
+Jika server menerima permintaan dengan `"GET /sleep HTTP/1.1"`, maka server akan tertunda selama 10 detik sebelum mengirimkan respons. Hal ini dirancang untuk mensimulasikan keterlambatan respons, yang dapat berdampak pada permintaan lain yang dikirim ke server.
+
+Untuk menguji efeknya, dapat dibuka dua jendela browser secara bersamaan—satu menuju endpoint `/`dan satu lagi ke `/sleep`. Jika kita mencoba mengakses `/` setelah menjalankan `/sleep`, kita akan melihat bahwa halaman `/` tidak langsung dimuat, melainkan harus menunggu hingga proses sleep selama 10 detik selesai. Hal ini menunjukkan bagaimana server menangani request dalam single-threaded mode, di mana satu request yang berjalan lama dapat menghambat eksekusi request lainnya.
